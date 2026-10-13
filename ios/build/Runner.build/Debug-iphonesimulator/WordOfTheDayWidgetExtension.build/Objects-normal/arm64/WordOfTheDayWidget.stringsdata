@@ -1,0 +1,24 @@
+{
+  "source": "/Users/aymanstrauch/Documents/WordOfTheDay/word_of_the_day/ios/WordOfTheDayWidget/WordOfTheDayWidget.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Word of the Day",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 90
+        }
+      },
+      {
+        "comment": "",
+        "key": "A daily word and its definition.",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 91
+        }
+      }
+    ]
+  },
+  "version": 1
+}

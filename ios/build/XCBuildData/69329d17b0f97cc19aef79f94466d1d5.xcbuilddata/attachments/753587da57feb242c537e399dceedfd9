@@ -1,0 +1,49 @@
+{
+  "" : {
+    "diagnostics" : "/Users/aymanstrauch/Documents/WordOfTheDay/word_of_the_day/ios/build/Runner.build/Debug-iphonesimulator/WordOfTheDayWidgetExtension.build/Objects-normal/arm64/WordOfTheDayWidgetExtension-primary.dia",
+    "emit-module-dependencies" : "/Users/aymanstrauch/Documents/WordOfTheDay/word_of_the_day/ios/build/Runner.build/Debug-iphonesimulator/WordOfTheDayWidgetExtension.build/Objects-normal/arm64/WordOfTheDayWidgetExtension-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/aymanstrauch/Documents/WordOfTheDay/word_of_the_day/ios/build/Runner.build/Debug-iphonesimulator/WordOfTheDayWidgetExtension.build/Objects-normal/arm64/WordOfTheDayWidgetExtension-primary-emit-module.dia",
+    "pch" : "/Users/aymanstrauch/Documents/WordOfTheDay/word_of_the_day/ios/build/Runner.build/Debug-iphonesimulator/WordOfTheDayWidgetExtension.build/Objects-normal/arm64/WordOfTheDayWidgetExtension-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/aymanstrauch/Documents/WordOfTheDay/word_of_the_day/ios/build/Runner.build/Debug-iphonesimulator/WordOfTheDayWidgetExtension.build/Objects-normal/arm64/WordOfTheDayWidgetExtension-primary.swiftdeps"
+  },
+  "/Users/aymanstrauch/Documents/WordOfTheDay/word_of_the_day/ios/WordOfTheDayWidget/WordOfTheDayWidget.swift" : {
+    "const-values" : "/Users/aymanstrauch/Documents/WordOfTheDay/word_of_the_day/ios/build/Runner.build/Debug-iphonesimulator/WordOfTheDayWidgetExtension.build/Objects-normal/arm64/WordOfTheDayWidget.swiftconstvalues",
+    "dependencies" : "/Users/aymanstrauch/Documents/WordOfTheDay/word_of_the_day/ios/build/Runner.build/Debug-iphonesimulator/WordOfTheDayWidgetExtension.build/Objects-normal/arm64/WordOfTheDayWidget.d",
+    "diagnostics" : "/Users/aymanstrauch/Documents/WordOfTheDay/word_of_the_day/ios/build/Runner.build/Debug-iphonesimulator/WordOfTheDayWidgetExtension.build/Objects-normal/arm64/WordOfTheDayWidget.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-iphonesimulator/WordOfTheDayWidgetExtension.build/Objects-normal/arm64/WordOfTheDayWidget.o",
+    "llvm-bc" : "/Users/aymanstrauch/Documents/WordOfTheDay/word_of_the_day/ios/build/Runner.build/Debug-iphonesimulator/WordOfTheDayWidgetExtension.build/Objects-normal/arm64/WordOfTheDayWidget.bc",
+    "object" : "/Users/aymanstrauch/Documents/WordOfTheDay/word_of_the_day/ios/build/Runner.build/Debug-iphonesimulator/WordOfTheDayWidgetExtension.build/Objects-normal/arm64/WordOfTheDayWidget.o",
+    "swift-dependencies" : "/Users/aymanstrauch/Documents/WordOfTheDay/word_of_the_day/ios/build/Runner.build/Debug-iphonesimulator/WordOfTheDayWidgetExtension.build/Objects-normal/arm64/WordOfTheDayWidget.swiftdeps",
+    "swiftmodule" : "/Users/aymanstrauch/Documents/WordOfTheDay/word_of_the_day/ios/build/Runner.build/Debug-iphonesimulator/WordOfTheDayWidgetExtension.build/Objects-normal/arm64/WordOfTheDayWidget~partial.swiftmodule"
+  },
+  "/Users/aymanstrauch/Documents/WordOfTheDay/word_of_the_day/ios/WordOfTheDayWidget/WordOfTheDayWidgetBundle.swift" : {
+    "const-values" : "/Users/aymanstrauch/Documents/WordOfTheDay/word_of_the_day/ios/build/Runner.build/Debug-iphonesimulator/WordOfTheDayWidgetExtension.build/Objects-normal/arm64/WordOfTheDayWidgetBundle.swiftconstvalues",
+    "dependencies" : "/Users/aymanstrauch/Documents/WordOfTheDay/word_of_the_day/ios/build/Runner.build/Debug-iphonesimulator/WordOfTheDayWidgetExtension.build/Objects-normal/arm64/WordOfTheDayWidgetBundle.d",
+    "diagnostics" : "/Users/aymanstrauch/Documents/WordOfTheDay/word_of_the_day/ios/build/Runner.build/Debug-iphonesimulator/WordOfTheDayWidgetExtension.build/Objects-normal/arm64/WordOfTheDayWidgetBundle.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-iphonesimulator/WordOfTheDayWidgetExtension.build/Objects-normal/arm64/WordOfTheDayWidgetBundle.o",
+    "llvm-bc" : "/Users/aymanstrauch/Documents/WordOfTheDay/word_of_the_day/ios/build/Runner.build/Debug-iphonesimulator/WordOfTheDayWidgetExtension.build/Objects-normal/arm64/WordOfTheDayWidgetBundle.bc",
+    "object" : "/Users/aymanstrauch/Documents/WordOfTheDay/word_of_the_day/ios/build/Runner.build/Debug-iphonesimulator/WordOfTheDayWidgetExtension.build/Objects-normal/arm64/WordOfTheDayWidgetBundle.o",
+    "swift-dependencies" : "/Users/aymanstrauch/Documents/WordOfTheDay/word_of_the_day/ios/build/Runner.build/Debug-iphonesimulator/WordOfTheDayWidgetExtension.build/Objects-normal/arm64/WordOfTheDayWidgetBundle.swiftdeps",
+    "swiftmodule" : "/Users/aymanstrauch/Documents/WordOfTheDay/word_of_the_day/ios/build/Runner.build/Debug-iphonesimulator/WordOfTheDayWidgetExtension.build/Objects-normal/arm64/WordOfTheDayWidgetBundle~partial.swiftmodule"
+  },
+  "/Users/aymanstrauch/Documents/WordOfTheDay/word_of_the_day/ios/WordOfTheDayWidget/WordOfTheDayWidgetControl.swift" : {
+    "const-values" : "/Users/aymanstrauch/Documents/WordOfTheDay/word_of_the_day/ios/build/Runner.build/Debug-iphonesimulator/WordOfTheDayWidgetExtension.build/Objects-normal/arm64/WordOfTheDayWidgetControl.swiftconstvalues",
+    "dependencies" : "/Users/aymanstrauch/Documents/WordOfTheDay/word_of_the_day/ios/build/Runner.build/Debug-iphonesimulator/WordOfTheDayWidgetExtension.build/Objects-normal/arm64/WordOfTheDayWidgetControl.d",
+    "diagnostics" : "/Users/aymanstrauch/Documents/WordOfTheDay/word_of_the_day/ios/build/Runner.build/Debug-iphonesimulator/WordOfTheDayWidgetExtension.build/Objects-normal/arm64/WordOfTheDayWidgetControl.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-iphonesimulator/WordOfTheDayWidgetExtension.build/Objects-normal/arm64/WordOfTheDayWidgetControl.o",
+    "llvm-bc" : "/Users/aymanstrauch/Documents/WordOfTheDay/word_of_the_day/ios/build/Runner.build/Debug-iphonesimulator/WordOfTheDayWidgetExtension.build/Objects-normal/arm64/WordOfTheDayWidgetControl.bc",
+    "object" : "/Users/aymanstrauch/Documents/WordOfTheDay/word_of_the_day/ios/build/Runner.build/Debug-iphonesimulator/WordOfTheDayWidgetExtension.build/Objects-normal/arm64/WordOfTheDayWidgetControl.o",
+    "swift-dependencies" : "/Users/aymanstrauch/Documents/WordOfTheDay/word_of_the_day/ios/build/Runner.build/Debug-iphonesimulator/WordOfTheDayWidgetExtension.build/Objects-normal/arm64/WordOfTheDayWidgetControl.swiftdeps",
+    "swiftmodule" : "/Users/aymanstrauch/Documents/WordOfTheDay/word_of_the_day/ios/build/Runner.build/Debug-iphonesimulator/WordOfTheDayWidgetExtension.build/Objects-normal/arm64/WordOfTheDayWidgetControl~partial.swiftmodule"
+  },
+  "/Users/aymanstrauch/Documents/WordOfTheDay/word_of_the_day/ios/build/Runner.build/Debug-iphonesimulator/WordOfTheDayWidgetExtension.build/DerivedSources/GeneratedAssetSymbols.swift" : {
+    "const-values" : "/Users/aymanstrauch/Documents/WordOfTheDay/word_of_the_day/ios/build/Runner.build/Debug-iphonesimulator/WordOfTheDayWidgetExtension.build/Objects-normal/arm64/GeneratedAssetSymbols.swiftconstvalues",
+    "dependencies" : "/Users/aymanstrauch/Documents/WordOfTheDay/word_of_the_day/ios/build/Runner.build/Debug-iphonesimulator/WordOfTheDayWidgetExtension.build/Objects-normal/arm64/GeneratedAssetSymbols.d",
+    "diagnostics" : "/Users/aymanstrauch/Documents/WordOfTheDay/word_of_the_day/ios/build/Runner.build/Debug-iphonesimulator/WordOfTheDayWidgetExtension.build/Objects-normal/arm64/GeneratedAssetSymbols.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-iphonesimulator/WordOfTheDayWidgetExtension.build/Objects-normal/arm64/GeneratedAssetSymbols.o",
+    "llvm-bc" : "/Users/aymanstrauch/Documents/WordOfTheDay/word_of_the_day/ios/build/Runner.build/Debug-iphonesimulator/WordOfTheDayWidgetExtension.build/Objects-normal/arm64/GeneratedAssetSymbols.bc",
+    "object" : "/Users/aymanstrauch/Documents/WordOfTheDay/word_of_the_day/ios/build/Runner.build/Debug-iphonesimulator/WordOfTheDayWidgetExtension.build/Objects-normal/arm64/GeneratedAssetSymbols.o",
+    "swift-dependencies" : "/Users/aymanstrauch/Documents/WordOfTheDay/word_of_the_day/ios/build/Runner.build/Debug-iphonesimulator/WordOfTheDayWidgetExtension.build/Objects-normal/arm64/GeneratedAssetSymbols.swiftdeps",
+    "swiftmodule" : "/Users/aymanstrauch/Documents/WordOfTheDay/word_of_the_day/ios/build/Runner.build/Debug-iphonesimulator/WordOfTheDayWidgetExtension.build/Objects-normal/arm64/GeneratedAssetSymbols~partial.swiftmodule"
+  }
+}
