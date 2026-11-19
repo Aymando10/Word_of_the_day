@@ -2,16 +2,18 @@
 //  WordOfTheDayWidgetBundle.swift
 //  WordOfTheDayWidget
 //
-//  Created by Ayman Strauch on 10/10/2026.
+//  Intellectual property of Strauch Development. All rights reserved.
 //
 
-import WidgetKit
 import SwiftUI
+import WidgetKit
 
-/// @invariant: The extension registers only the daily-word home screen widget.
+/// Entry point for the widget extension process.
+///
+/// @invariant: Exposes only [WordOfTheDayWidget] to the host operating system.
 @main
 struct WordOfTheDayWidgetBundle: WidgetBundle {
-    /// @postcondition: Returns the Word of the Day widget as the extension's sole widget.
+    /// @postcondition: Registers the daily word widget configuration.
     var body: some Widget {
         WordOfTheDayWidget()
     }
