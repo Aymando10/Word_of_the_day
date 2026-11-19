@@ -145,6 +145,19 @@ void main() {
     expect(widgetSync.calls.length, 2);
   });
 
+  test('onboarding is shown once and remembered', () async {
+    final c = build();
+    await c.initialize();
+    expect(c.hasSeenOnboarding, isFalse);
+
+    await c.completeOnboarding();
+    expect(c.hasSeenOnboarding, isTrue);
+
+    final restored = build();
+    await restored.initialize();
+    expect(restored.hasSeenOnboarding, isTrue);
+  });
+
   test('ignores corrupt stored data', () async {
     store.values['pref_categories'] = '{not json';
     store.values['history'] = jsonEncode(['wrong', 'shape']);

@@ -8,6 +8,7 @@ import 'app_scope.dart';
 import 'screens/journal_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/today_screen.dart';
+import 'screens/widget_guide_screen.dart';
 import 'services/notification_service.dart';
 import 'services/storage.dart';
 import 'services/widget_sync_service.dart';
@@ -94,6 +95,13 @@ class _HomeShellState extends State<HomeShell> {
   @override
   Widget build(BuildContext context) {
     final controller = AppScope.of(context);
+
+    if (controller.isReady && !controller.hasSeenOnboarding) {
+      return WidgetGuideScreen(
+        isFirstRun: true,
+        onFinished: controller.completeOnboarding,
+      );
+    }
 
     return Scaffold(
       body: ForestBackground(

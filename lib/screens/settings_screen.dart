@@ -5,6 +5,7 @@ import '../app_controller.dart';
 import '../app_scope.dart';
 import '../models/word.dart';
 import '../theme.dart';
+import 'widget_guide_screen.dart';
 
 /// Category, difficulty and reminder preferences.
 class SettingsScreen extends StatelessWidget {
@@ -143,24 +144,46 @@ class SettingsScreen extends StatelessWidget {
         const SizedBox(height: 32),
         const _SectionHeader(title: 'Widget', subtitle: null),
         const SizedBox(height: 14),
-        const _Panel(
-          child: Padding(
-            padding: EdgeInsets.all(18),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(Icons.widgets_outlined, color: AppColors.sage),
-                SizedBox(width: 16),
-                Expanded(
-                  child: Text(
-                    'Your home screen widget picks a new word at midnight '
-                    'on its own, and follows any changes you make here '
-                    'straight away.',
-                    style: TextStyle(color: AppColors.muted, height: 1.45),
+        _Panel(
+          child: Column(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.add_to_home_screen, color: AppColors.sage),
+                title: const Text('How to add the widget'),
+                subtitle: const Text(
+                  'A quick step-by-step guide',
+                  style: TextStyle(color: AppColors.muted),
+                ),
+                trailing: const Icon(Icons.chevron_right, color: AppColors.muted),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    fullscreenDialog: true,
+                    builder: (routeContext) => WidgetGuideScreen(
+                      onFinished: () => Navigator.of(routeContext).pop(),
+                    ),
                   ),
                 ),
-              ],
-            ),
+              ),
+              const Divider(indent: 16, endIndent: 16),
+              const Padding(
+                padding: EdgeInsets.all(18),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.widgets_outlined, color: AppColors.sage),
+                    SizedBox(width: 16),
+                    Expanded(
+                      child: Text(
+                        'Your home screen widget picks a new word at midnight '
+                        'on its own, and follows any changes you make here '
+                        'straight away.',
+                        style: TextStyle(color: AppColors.muted, height: 1.45),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ],

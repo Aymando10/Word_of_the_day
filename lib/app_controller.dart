@@ -50,6 +50,7 @@ class AppController extends ChangeNotifier {
   static const String _favoritesKey = 'favorites';
   static const String _historyKey = 'history';
   static const String _reminderKey = 'reminder';
+  static const String _onboardingKey = 'onboarding_done';
 
   final KeyValueStore _store;
   final WidgetSyncService _widgetSync;
@@ -65,6 +66,7 @@ class AppController extends ChangeNotifier {
   Map<String, String> _history = {};
   bool _remindersEnabled = false;
   TimeOfDay _reminderTime = const TimeOfDay(hour: 9, minute: 0);
+  bool _hasSeenOnboarding = false;
 
   List<Word> _pool = const [];
   late DateTime _todayDate;
@@ -87,6 +89,9 @@ class AppController extends ChangeNotifier {
   bool get remindersEnabled => _remindersEnabled;
   TimeOfDay get reminderTime => _reminderTime;
   SyncStatus get syncStatus => _syncStatus;
+
+  /// Whether the first-launch widget setup guide has been finished or skipped.
+  bool get hasSeenOnboarding => _hasSeenOnboarding;
 
   bool isFavorite(Word word) => _favoriteIds.contains(word.id);
 
@@ -166,6 +171,13 @@ class AppController extends ChangeNotifier {
     if (!_favoriteIds.remove(word.id)) _favoriteIds.insert(0, word.id);
     notifyListeners();
     await _save(_favoritesKey, jsonEncode(_favoriteIds));
+  }
+
+  Future<void> completeOnboarding() async {
+    if (_hasSeenOnboarding) return;
+    _hasSeenOnboarding = true;
+    notifyListeners();
+    await _save(_onboardingKey, 'true');
   }
 
   Future<ReminderResult> setRemindersEnabled(bool enabled) async {
@@ -295,6 +307,11 @@ class AppController extends ChangeNotifier {
   }
 
   Future<void> _loadPreferences() async {
+    _hasSeenOnboarding = await _readJson(
+      _onboardingKey,
+      (json) => json == true,
+      false,
+    );
     _categories = await _readEnumSet(
       _categoriesKey,
       WordCategory.values,
