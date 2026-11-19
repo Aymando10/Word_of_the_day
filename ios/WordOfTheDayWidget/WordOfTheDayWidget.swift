@@ -8,159 +8,164 @@
 import SwiftUI
 import WidgetKit
 
-/// Centralized configuration constants shared with the Flutter bridge.
+/// Constants shared with the Flutter app.
 ///
-/// @invariant: Identifiers match the Dart [WidgetSyncService] constants character-for-character.
+/// @invariant: Keys match `lib/services/widget_sync_service.dart`, and the
+/// rotation epoch matches `rotationEpoch` in `lib/services/word_selector.dart`.
 private enum WidgetConfig {
     static let kind = "WordOfTheDayWidget"
     static let appGroupId = "group.com.aymanstrauch.wordapp"
+    static let poolKey = "word_pool"
     static let wordKey = "daily_word"
     static let definitionKey = "daily_def"
-    static let scheduleKey = "word_schedule"
+    static let epoch = DateComponents(year: 2020, month: 1, day: 1)
     static let lookaheadDays = 14
 
-    static let fallbackWord = "Open Word of the Day"
-    static let fallbackDefinition = "Sync today's word from the app to get started."
-    static let previewWord = "Petrichor"
-    static let previewDefinition = "The earthy scent that follows the first rain after a dry spell."
+    static let fallbackWord = "Word of the Day"
+    static let fallbackDefinition = "Open the app to choose what you'd like to learn."
 }
 
-/// Decodable DTO matching the JSON structure written by Dart's [WordOfTheDay.toJson].
-///
-/// @invariant: Mirrors the exact keys serialized by the Flutter bridge.
-private struct ScheduledWordDTO: Decodable {
-    let word: String
-    let definition: String
+/// Forest-green palette mirroring `lib/theme.dart`.
+private enum Palette {
+    static let top = Color(hex: 0x173126)
+    static let bottom = Color(hex: 0x0A1913)
+    static let cream = Color(hex: 0xF1EADB)
+    static let gold = Color(hex: 0xD8BE85)
+    static let sage = Color(hex: 0x8DBF9E)
 }
 
-/// Immutable timeline payload representing a single widget render state.
-///
-/// @invariant: [word] and [definition] are guaranteed to be non-empty, trimmed display strings.
-struct WordEntry: TimelineEntry {
-    let date: Date
-    let word: String
-    let definition: String
-
-    /// Sanitizes inputs so the struct invariant holds regardless of caller.
-    ///
-    /// @precondition: [date] is a valid [Date] instance.
-    /// @postcondition: Initializes non-empty [word] and [definition], falling back to defaults if blank.
-    init(date: Date, word: String?, definition: String?) {
-        self.date = date
-        let trimmedWord = word?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        let trimmedDef = definition?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-
-        self.word = trimmedWord.isEmpty ? WidgetConfig.fallbackWord : trimmedWord
-        self.definition = trimmedDef.isEmpty ? WidgetConfig.fallbackDefinition : trimmedDef
-    }
-
-    /// Representative sample entry for the iOS Widget Gallery and Xcode previews.
-    ///
-    /// @postcondition: Returns a populated [WordEntry] stamped with [date].
-    static func preview(at date: Date = .now) -> WordEntry {
-        WordEntry(
-            date: date,
-            word: WidgetConfig.previewWord,
-            definition: WidgetConfig.previewDefinition
+private extension Color {
+    init(hex: UInt32) {
+        self.init(
+            red: Double((hex >> 16) & 0xFF) / 255,
+            green: Double((hex >> 8) & 0xFF) / 255,
+            blue: Double(hex & 0xFF) / 255
         )
     }
 }
 
-/// Supplies multi-day timeline entries to WidgetKit from the shared App Group container.
+/// One word in the rotation, as written by `Word.toWidgetJson()` in Dart.
+private struct PooledWord: Decodable {
+    let word: String
+    let definition: String
+    let pronunciation: String?
+    let partOfSpeech: String?
+}
+
+/// A single widget render state.
 ///
-/// @invariant: Reads exclusively from the configured App Group suite and always returns at least one entry.
+/// @invariant: [word] and [definition] are non-empty, trimmed display strings.
+struct WordEntry: TimelineEntry {
+    let date: Date
+    let word: String
+    let definition: String
+    let pronunciation: String
+    let partOfSpeech: String
+
+    init(date: Date, word: String?, definition: String?, pronunciation: String? = nil, partOfSpeech: String? = nil) {
+        func clean(_ s: String?) -> String { s?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "" }
+        self.date = date
+        let w = clean(word)
+        let d = clean(definition)
+        self.word = w.isEmpty ? WidgetConfig.fallbackWord : w
+        self.definition = d.isEmpty ? WidgetConfig.fallbackDefinition : d
+        self.pronunciation = clean(pronunciation)
+        self.partOfSpeech = clean(partOfSpeech)
+    }
+
+    static func preview(at date: Date = .now) -> WordEntry {
+        WordEntry(
+            date: date,
+            word: "Petrichor",
+            definition: "The earthy scent produced when rain falls on dry soil.",
+            pronunciation: "PET-rih-kor",
+            partOfSpeech: "noun"
+        )
+    }
+}
+
+/// Builds the timeline from the rotation stored in the App Group.
+///
+/// The widget picks each day's word itself, using the same rule as the app,
+/// so it keeps updating every midnight even if the app is never reopened.
 struct Provider: TimelineProvider {
-    /// Gregorian calendar in the device's *current* time zone, rebuilt on each access so
-    /// date keys stay in sync with Dart's local `DateTime` if the user changes time zones.
-    private static var gregorian: Calendar {
+    /// Gregorian calendar in the device's current time zone, rebuilt on each
+    /// access so day boundaries follow time zone changes.
+    private static var calendar: Calendar {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = .current
         return calendar
     }
 
-    /// @postcondition: Returns a non-empty placeholder entry for skeleton loading.
     func placeholder(in context: Context) -> WordEntry {
         .preview()
     }
 
-    /// @precondition: [context] describes the current WidgetKit rendering environment.
-    /// @postcondition: Returns the preview entry for the Widget Gallery, or today's entry otherwise.
     func getSnapshot(in context: Context, completion: @escaping (WordEntry) -> Void) {
         if context.isPreview {
             completion(.preview())
         } else {
-            let entries = buildScheduledEntries(startingFrom: .now)
-            completion(entries.first ?? readFallbackEntry(at: .now))
+            completion(buildEntries(from: .now).first ?? readFallbackEntry(at: .now))
         }
     }
 
-    /// @precondition: WidgetKit requests a timeline update.
-    /// @postcondition: Delivers a multi-day midnight-aligned timeline and requests a reload when exhausted.
     func getTimeline(in context: Context, completion: @escaping (Timeline<WordEntry>) -> Void) {
         let now = Date.now
-        let entries = buildScheduledEntries(startingFrom: now)
+        let entries = buildEntries(from: now)
+        let calendar = Self.calendar
 
-        // Request a new timeline once the pre-scheduled entries finish, or after tomorrow's midnight if using fallback.
-        let reloadPolicy: TimelineReloadPolicy
-        if entries.count > 1 {
-            reloadPolicy = .atEnd
-        } else {
-            let nextMidnight = Self.gregorian.nextDate(
-                after: now,
-                matching: DateComponents(hour: 0, minute: 0, second: 0),
-                matchingPolicy: .nextTime
-            ) ?? now.addingTimeInterval(86_400)
-            reloadPolicy = .after(nextMidnight)
-        }
+        // Rebuild the day after the last entry, so the timeline never runs dry.
+        let lastDay = calendar.startOfDay(for: entries.last?.date ?? now)
+        let reloadDate = calendar.date(byAdding: .day, value: 1, to: lastDay)
+            ?? now.addingTimeInterval(86_400)
 
-        completion(Timeline(entries: entries, policy: reloadPolicy))
+        completion(Timeline(entries: entries, policy: .after(reloadDate)))
     }
 
-    /// Builds up to [WidgetConfig.lookaheadDays] timeline entries aligned to local midnight boundaries.
+    /// One entry per day, starting now and switching at each local midnight.
     ///
-    /// @precondition: [referenceDate] is the current evaluation timestamp.
-    /// @postcondition: Returns a chronologically ordered, non-empty array of [WordEntry] items.
-    private func buildScheduledEntries(startingFrom referenceDate: Date) -> [WordEntry] {
-        let defaults = UserDefaults(suiteName: WidgetConfig.appGroupId)
-        guard
-            let jsonString = defaults?.string(forKey: WidgetConfig.scheduleKey),
-            let jsonData = jsonString.data(using: .utf8),
-            let schedule = try? JSONDecoder().decode([String: ScheduledWordDTO].self, from: jsonData),
-            !schedule.isEmpty
-        else {
-            return [readFallbackEntry(at: referenceDate)]
+    /// @postcondition: Returns a non-empty, chronologically ordered array.
+    private func buildEntries(from now: Date) -> [WordEntry] {
+        let pool = loadPool()
+        let calendar = Self.calendar
+        guard !pool.isEmpty, let epoch = calendar.date(from: WidgetConfig.epoch) else {
+            return [readFallbackEntry(at: now)]
         }
 
-        let startOfToday = Self.gregorian.startOfDay(for: referenceDate)
+        let startOfToday = calendar.startOfDay(for: now)
         var entries: [WordEntry] = []
 
-        for dayOffset in 0..<WidgetConfig.lookaheadDays {
-            guard let targetDay = Self.gregorian.date(byAdding: .day, value: dayOffset, to: startOfToday) else {
-                continue
-            }
-            let key = Self.dateKey(for: targetDay)
-            guard let scheduled = schedule[key] else {
-                continue
-            }
+        for offset in 0..<WidgetConfig.lookaheadDays {
+            guard let day = calendar.date(byAdding: .day, value: offset, to: startOfToday) else { continue }
+            let days = calendar.dateComponents([.day], from: epoch, to: day).day ?? 0
+            let count = pool.count
+            let item = pool[((days % count) + count) % count]
 
-            // Day 0 renders immediately at referenceDate; future days activate at 00:00:00 local midnight.
-            let entryTimestamp = (dayOffset == 0) ? referenceDate : targetDay
             entries.append(
                 WordEntry(
-                    date: entryTimestamp,
-                    word: scheduled.word,
-                    definition: scheduled.definition
+                    date: offset == 0 ? now : day,
+                    word: item.word,
+                    definition: item.definition,
+                    pronunciation: item.pronunciation,
+                    partOfSpeech: item.partOfSpeech
                 )
             )
         }
 
-        return entries.isEmpty ? [readFallbackEntry(at: referenceDate)] : entries
+        return entries.isEmpty ? [readFallbackEntry(at: now)] : entries
     }
 
-    /// Reads the single-day fallback keys if no valid schedule exists for the current date.
-    ///
-    /// @precondition: [date] is a valid [Date] instance.
-    /// @postcondition: Returns a valid [WordEntry] using single-day keys or default instructions.
+    private func loadPool() -> [PooledWord] {
+        guard
+            let json = UserDefaults(suiteName: WidgetConfig.appGroupId)?.string(forKey: WidgetConfig.poolKey),
+            let data = json.data(using: .utf8),
+            let pool = try? JSONDecoder().decode([PooledWord].self, from: data)
+        else {
+            return []
+        }
+        return pool
+    }
+
     private func readFallbackEntry(at date: Date) -> WordEntry {
         let defaults = UserDefaults(suiteName: WidgetConfig.appGroupId)
         return WordEntry(
@@ -169,95 +174,122 @@ struct Provider: TimelineProvider {
             definition: defaults?.string(forKey: WidgetConfig.definitionKey)
         )
     }
-
-    /// Formats [date] as a locale-independent YYYY-MM-DD key using Gregorian components.
-    ///
-    /// @precondition: [date] is a valid [Date] instance.
-    /// @postcondition: Returns a 10-character ASCII string matching Dart's date key format.
-    private static func dateKey(for date: Date) -> String {
-        let comps = gregorian.dateComponents([.year, .month, .day], from: date)
-        return String(
-            format: "%04d-%02d-%02d",
-            comps.year ?? 1970,
-            comps.month ?? 1,
-            comps.day ?? 1
-        )
-    }
 }
 
-/// Adaptive SwiftUI view rendering the daily word across Home Screen and Lock Screen families.
-///
-/// @invariant: Typography and line limits adapt to [widgetFamily] without clipping the primary word.
+/// Renders the word on the Home Screen and Lock Screen.
 struct WordOfTheDayWidgetEntryView: View {
     @Environment(\.widgetFamily) private var family
-    let entry: Provider.Entry
+    let entry: WordEntry
 
-    /// @postcondition: Renders the word hierarchy scaled to the active widget family bounds.
     var body: some View {
-        VStack(alignment: .leading, spacing: family == .accessoryRectangular ? 2 : 6) {
+        content
+            .containerBackground(for: .widget) {
+                if family == .accessoryRectangular {
+                    Color.clear
+                } else {
+                    LinearGradient(
+                        colors: [Palette.top, Palette.bottom],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                }
+            }
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        if family == .accessoryRectangular {
+            lockScreen
+        } else {
+            homeScreen
+        }
+    }
+
+    private var lockScreen: some View {
+        VStack(alignment: .leading, spacing: 1) {
             Text(entry.word)
-                .font(.system(titleFont, design: .serif, weight: .bold))
+                .font(.system(.headline, design: .serif, weight: .bold))
                 .lineLimit(1)
-                .minimumScaleFactor(0.65)
+                .minimumScaleFactor(0.7)
+                .widgetAccentable()
+            Text(entry.definition)
+                .font(.caption2)
+                .lineLimit(2)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var isSmall: Bool { family == .systemSmall }
+
+    private var detailLine: String {
+        isSmall
+            ? entry.partOfSpeech
+            : [entry.pronunciation, entry.partOfSpeech].filter { !$0.isEmpty }.joined(separator: "  ·  ")
+    }
+
+    private var homeScreen: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text("WORD OF THE DAY")
+                .font(.system(size: 9, weight: .semibold))
+                .tracking(1.6)
+                .foregroundStyle(Palette.gold)
+
+            Spacer(minLength: 6)
+
+            Text(entry.word)
+                .font(.system(size: isSmall ? 24 : 28, weight: .semibold, design: .serif))
+                .foregroundStyle(Palette.cream)
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
+
+            if !detailLine.isEmpty {
+                Text(detailLine)
+                    .font(.system(size: 11, design: .serif).italic())
+                    .foregroundStyle(Palette.sage)
+                    .lineLimit(1)
+                    .padding(.top, 2)
+            }
+
+            Rectangle()
+                .fill(Palette.gold)
+                .frame(width: 22, height: 1.5)
+                .padding(.vertical, isSmall ? 6 : 8)
 
             Text(entry.definition)
-                .font(definitionFont)
-                .foregroundStyle(.secondary)
-                .lineLimit(definitionLineLimit)
+                .font(.system(size: isSmall ? 12 : 13))
+                .foregroundStyle(Palette.cream.opacity(0.85))
+                .lineLimit(3)
+                .fixedSize(horizontal: false, vertical: true)
 
-            if family != .accessoryRectangular {
-                Spacer(minLength: 0)
-            }
+            Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
-
-    private var titleFont: Font.TextStyle {
-        switch family {
-        case .accessoryRectangular: return .headline
-        case .systemSmall: return .title3
-        default: return .title2
-        }
-    }
-
-    private var definitionFont: Font {
-        family == .accessoryRectangular ? .caption2 : .subheadline
-    }
-
-    private var definitionLineLimit: Int {
-        switch family {
-        case .accessoryRectangular: return 2
-        case .systemSmall: return 4
-        default: return 3
-        }
-    }
 }
 
-/// Widget configuration registering the daily word view and supported display families.
+/// Widget configuration.
 ///
-/// @invariant: [kind] matches [WidgetConfig.kind] used by the Flutter bridge.
+/// @invariant: [kind] matches the widget name the Flutter app reloads.
 struct WordOfTheDayWidget: Widget {
     let kind: String = WidgetConfig.kind
 
-    /// @postcondition: Configures a static widget supporting small, medium, and lock screen families.
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: Provider()) { entry in
-            if #available(iOS 17.0, *) {
-                WordOfTheDayWidgetEntryView(entry: entry)
-                    .containerBackground(.fill.tertiary, for: .widget)
-            } else {
-                WordOfTheDayWidgetEntryView(entry: entry)
-                    .padding()
-                    .background()
-            }
+            WordOfTheDayWidgetEntryView(entry: entry)
         }
         .configurationDisplayName("Word of the Day")
-        .description("Expand your vocabulary with a daily word on your Home or Lock Screen.")
+        .description("A new word every day, on your Home Screen or Lock Screen.")
         .supportedFamilies([.systemSmall, .systemMedium, .accessoryRectangular])
     }
 }
 
 #Preview(as: .systemSmall) {
+    WordOfTheDayWidget()
+} timeline: {
+    WordEntry.preview()
+}
+
+#Preview(as: .systemMedium) {
     WordOfTheDayWidget()
 } timeline: {
     WordEntry.preview()
